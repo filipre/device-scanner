@@ -12,10 +12,10 @@ import redis
 
 logging.getLogger().setLevel(logging.INFO)
 
-REDIS_KEY = "DeviceTracker:People"
+REDIS_KEY = "DeviceScanner:People"
 
 
-class DeviceTracker:
+class DeviceScanner:
     def __init__(self, config: dict):
         self.last_seen = {}  # <mac-address: str>: <last-seen: datetime>
 
@@ -157,9 +157,9 @@ class DeviceTracker:
 
 if __name__ == "__main__":
     try:
-        config_path = os.environ["DEVICE_TRACKER_CONFIG"]
+        config_path = os.environ["DEVICE_SCANNER_CONFIG"]
     except KeyError:
-        logging.error("DEVICE_TRACKER_CONFIG is not set")
+        logging.error("DEVICE_SCANNER_CONFIG is not set")
         sys.exit(1)
 
     try:
@@ -169,5 +169,5 @@ if __name__ == "__main__":
         logging.error(f"Config {config_path} does not exist or is invalid")
         sys.exit(1)
 
-    dt = DeviceTracker(config)
+    dt = DeviceScanner(config)
     dt.start()

@@ -1,4 +1,4 @@
-# 🍇 Device Tracker
+# 🍇 Device Scanner
 
 Scan your network and see who is connected
 
@@ -32,8 +32,8 @@ log_path: "./log.txt"
 2. Create a `docker-compose.yml` and reference to the code here
 ```yml
 services:
-  device-tracker:
-    container_name: device-tracker
+  device-scanner:
+    container_name: device-scanner
     build: .
     volumes:
       - ${SCAN_PATH}:/app/scan.txt
@@ -41,7 +41,7 @@ services:
       - ${CONFIG_PATH}:/app/config.yml
     network_mode: host
     environment:
-      DEVICE_TRACKER_CONFIG: /app/config.yml
+      DEVICE_SCANNER_CONFIG: /app/config.yml
 ```
 
 3. Start the application
