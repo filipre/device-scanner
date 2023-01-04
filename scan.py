@@ -150,6 +150,7 @@ class DeviceScanner:
     def _log(self, addresses: list):
         with open(self.log_path, "a") as f:
             f.write(str(datetime.now()))
+            f.write(";")
             f.write(";".join(addresses))
             f.write("\n")
 
