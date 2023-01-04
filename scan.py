@@ -67,15 +67,18 @@ class DeviceScanner:
         except Exception as e:
             logging.warn(e)
 
+        if self.log_enable:
+            self._log(mac_addresses)
+
         names, unknown = self._translate_addresses(mac_addresses)
         return names, unknown
 
     def start(self):
-        logging.info("Start tracking")
+        logging.info("Start scanning")
 
         while True:
             names, unknown = self.scan()
-            logging.info(f"{datetime.now()}: 🪪 {names}, 🤖 {unknown}")
+            logging.info(f"{datetime.now()}: 🪪 {names}, 📱 {unknown}")
 
             self._update_last_seen(names)
 
@@ -84,9 +87,6 @@ class DeviceScanner:
 
             if self.file_enable:
                 self._save_file()
-
-            if self.log_enable:
-                self._log(names, unknown)
 
             time.sleep(self.interval)
 
@@ -147,11 +147,10 @@ class DeviceScanner:
             f.write("\n".join(tracked))
             f.write("\n")
 
-    def _log(self, known: list, unknown: list):
+    def _log(self, addresses: list):
         with open(self.log_path, "a") as f:
-            tracked = self.last_seen.keys()
             f.write(str(datetime.now()))
-            f.write(";".join(tracked))
+            f.write(";".join(addresses))
             f.write("\n")
 
 
