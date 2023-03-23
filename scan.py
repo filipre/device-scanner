@@ -65,7 +65,7 @@ class DeviceScanner:
         try:
             mac_addresses = self._raw_scan()
         except Exception as e:
-            logging.warn(e)
+            logging.warning(e)
 
         if self.log_enable:
             self._log(mac_addresses)

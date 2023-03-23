@@ -1,4 +1,4 @@
-# 🍇 Device Scanner
+# 🍓 Device Scanner
 
 Scan your network and see who is connected
 
