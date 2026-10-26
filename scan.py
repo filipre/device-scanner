@@ -131,7 +131,7 @@ class DeviceScanner:
             del self.last_seen[person]
 
     def _save_redis(self):
-        tracked = self.last_seen.keys()
+        tracked = list(self.last_seen.keys())
 
         try:
             obj = json.dumps(tracked)
