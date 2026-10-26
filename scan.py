@@ -5,6 +5,8 @@ import sys
 import os
 import yaml
 import logging
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Tuple
 from datetime import datetime, timedelta
 import redis
@@ -15,9 +17,29 @@ logging.getLogger().setLevel(logging.INFO)
 REDIS_KEY = "DeviceScanner:People"
 
 
+class ApiHandler(BaseHTTPRequestHandler):
+    scanner = None  # set by DeviceScanner._start_api
+
+    def do_GET(self):
+        if self.path != "/people":
+            self.send_error(404)
+            return
+
+        body = json.dumps(self.scanner.online).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format, *args):
+        logging.debug(format % args)
+
+
 class DeviceScanner:
     def __init__(self, config: dict):
         self.last_seen = {}  # <mac-address: str>: <last-seen: datetime>
+        self.online = []  # snapshot of last_seen keys, read by the api thread
 
         # mac address config
         self.people = config.get("people", {})
@@ -51,6 +73,16 @@ class DeviceScanner:
                 logging.error("file_path is not set")
                 self.file_enable = False
 
+        # api
+        self.api_enable = config.get("api_enable", False)
+        if self.api_enable:
+            try:
+                self.api_host = config["api_host"]
+                self.api_port = config["api_port"]
+            except KeyError:
+                logging.error("api_host or api_port are not set")
+                self.api_enable = False
+
         # address logging
         self.log_enable = config.get("log_enable", False)
         if self.log_enable:
@@ -74,6 +106,9 @@ class DeviceScanner:
         return names, unknown
 
     def start(self):
+        if self.api_enable:
+            self._start_api()
+
         logging.info("Start scanning")
 
         while True:
@@ -81,6 +116,7 @@ class DeviceScanner:
             logging.info(f"{datetime.now()}: 🪪 {names}, 📱 {unknown}")
 
             self._update_last_seen(names)
+            self.online = list(self.last_seen.keys())
 
             if self.redis_enable:
                 self._save_redis()
@@ -146,6 +182,13 @@ class DeviceScanner:
             tracked = self.last_seen.keys()
             f.write("\n".join(tracked))
             f.write("\n")
+
+    def _start_api(self):
+        ApiHandler.scanner = self
+        server = ThreadingHTTPServer((self.api_host, self.api_port), ApiHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        logging.info(f"API listening on {self.api_host}:{self.api_port}")
 
     def _log(self, addresses: list):
         with open(self.log_path, "a") as f:

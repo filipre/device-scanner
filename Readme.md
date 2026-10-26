@@ -24,6 +24,11 @@ redis_port: 6379
 file_enable: false
 file_path: "./scan.txt"
 
+# serve who is currently online via GET /people
+api_enable: false
+api_host: 0.0.0.0
+api_port: 8080
+
 # persist who is online when
 log_enable: false
 log_path: "./log.txt" 
