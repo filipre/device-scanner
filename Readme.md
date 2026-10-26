@@ -48,3 +48,12 @@ services:
 ```
 docker-compose up
 ```
+
+## Local Development
+
+Dependencies are managed with [uv](https://docs.astral.sh/uv/).
+
+```
+uv sync
+DEVICE_SCANNER_CONFIG=./config.yml uv run scan.py
+```

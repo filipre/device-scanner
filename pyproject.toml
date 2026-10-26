@@ -1,0 +1,10 @@
+[project]
+name = "device-scanner"
+version = "0.1.0"
+description = "Scan your network and see who is connected"
+requires-python = ">=3.14"
+dependencies = [
+    "python-nmap>=0.7.1",
+    "pyyaml>=6.0.3",
+    "redis>=7.0.1",
+]
